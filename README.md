@@ -4,17 +4,41 @@
 
 # What is jenkins-jnlp-slave-php ?
 
-[jenkins-jnlp-slave-php](https://github.com/gomoob/docker-jenkins-jnlp-slave-php "jenkins-jnlp-slave-php") is an all-in-one Sensu
-server. It contains a preconfigured Sensu server, Sensu API, a RabbitMQ broker and the Uchiwa web console inside only
-one Docker container.
+[gomoob/jenkins-jnlp-slave-php](https://github.com/gomoob/docker-jenkins-jnlp-slave-php "gomoob/jenkins-jnlp-slave-php")
+is a Docker Jenkins slave image using JNLP to establish connection and providing PHP build tools
+
+The container is based on the official Jenkins [jenkinsci/jnlp-slave](https://hub.docker.com/r/jenkinsci/jnlp-slave "jenkinsci/jnlp-slave")
+Docker slave container and adds several additional tools to build PHP projects.
+
+The following tools can be calls under the Jenkins slave.
+
+* `php-7.0.21` or simply `php-7.0` to execute PHP 7.0.x ;
+* `php-7.1.7` or simply `php-7.1` to execute PHP 7.1.x ;
+* `phpunit` ;
+* `composer` ;
+* `phpmd` ;
+* `sami` ;
+* `phpcov` ;
+* `phpcpd` ;
+* `phploc` ;
+* `box`.
 
 # How to use this image.
 
-## With command line
+## Run with command line
 
 ```console
 $ docker run --name jenkins-jnlp-slave-php gomoob/jenkins-slave-php -url http://jenkins-server:port <secret> <agent name>
 ```
+
+## Optional environment variables
+
+* `JENKINS_URL` : url for the Jenkins server, can be used as a replacement to -url option, or to set alternate jenkins
+  URL ;
+* `JENKINS_TUNNEL`: (HOST:PORT) connect to this agent host and port instead of Jenkins server, assuming this one do
+  route TCP traffic to Jenkins master. Useful when when Jenkins runs behind a load balancer, reverse proxy, etc ;
+* `JENKINS_SECRET` : agent secret, if not set as an argument ;
+* `JENKINS_AGENT_NAME` : agent name, if not set as an argument.
 
 # About Gomoob
 
