@@ -15,7 +15,7 @@ The following tools can be calls under the Jenkins slave.
 * `php-7.0.21` or simply `php-7.0` to execute PHP 7.0.x ;
 * `php-7.1.7` or simply `php-7.1` to execute PHP 7.1.x ;
 * `phpunit` ;
-* `composer` ;
+* `composer` (based on [prestissimo](https://github.com/hirak/prestissimo "prestissimo") ;
 * `phpmd` ;
 * `sami` ;
 * `phpcov` ;
