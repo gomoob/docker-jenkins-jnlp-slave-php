@@ -10,7 +10,7 @@ is a Docker Jenkins slave image using JNLP to establish connection and providing
 The container is based on the official Jenkins [jenkinsci/jnlp-slave](https://hub.docker.com/r/jenkinsci/jnlp-slave "jenkinsci/jnlp-slave")
 Docker slave container and adds several additional tools to build PHP projects.
 
-The following tools can be calls under the Jenkins slave.
+The following tools can be called under the Jenkins slave.
 
 * `php-7.0.21` or simply `php-7.0` to execute PHP 7.0.x ;
 * `php-7.1.7` or simply `php-7.1` to execute PHP 7.1.x ;
@@ -22,6 +22,15 @@ The following tools can be calls under the Jenkins slave.
 * `phpcpd` ;
 * `phploc` ;
 * `box`.
+
+Each version of PHP available is compiled with the following extensions.
+
+`bcmath`, `bz2`, `calendar`, `cli`, `ctype`, `dom`, `fileinfo`, `filter`, `ipc`, `json`, `mbregex`, `mbstring`, `mhash`,
+`mcrypt`, `pcntl`, `pcre`, `pdo`, `phar`, `posix`, `readline`, `sockets`, `tokenizer`, `xml`, `curl`, `openssl`, `zip`.
+
+In addition the following extensions are also installed with each PHP executable.
+
+`apcu`, `xdebug`
 
 # How to use this image.
 
@@ -39,6 +48,31 @@ $ docker run --name jenkins-jnlp-slave-php gomoob/jenkins-slave-php -url http://
   route TCP traffic to Jenkins master. Useful when when Jenkins runs behind a load balancer, reverse proxy, etc ;
 * `JENKINS_SECRET` : agent secret, if not set as an argument ;
 * `JENKINS_AGENT_NAME` : agent name, if not set as an argument.
+
+# Configuration specifics
+
+## Enabled JNLP protocols
+
+By default, the [JNLP3-connect](https://github.com/jenkinsci/remoting/blob/master/docs/protocols.md#jnlp3-connect "JNLP3-connect")
+is disabled due to the known stability and scalability issues.
+
+You can enable this protocol on your own risk using the
+`JNLP_PROTOCOL_OPTS=-Dorg.jenkinsci.remoting.engine.JnlpProtocol3.disabled=false` property (the protocol should be
+enabled on the master side as well).
+
+In Jenkins versions starting from `2.27` there is a
+[JNLP4-connect](https://github.com/jenkinsci/remoting/blob/master/docs/protocols.md#jnlp4-connect "JNLP4-connect")
+protocol.
+
+If you use Jenkins `2.32.x LTS`, it is recommended to enable the protocol on your instance.
+
+## Amazon ECS
+
+Make sure your ECS container agent is
+[updated](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-update.html "updated") before running.
+Older versions do not properly handle the
+[entryPoint](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions "entryPoint")
+parameter. See the entryPoint definition for more information.
 
 # About Gomoob
 

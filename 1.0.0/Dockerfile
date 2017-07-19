@@ -14,9 +14,9 @@ RUN echo "deb http://packages.dotdeb.org jessie all" > /etc/apt/sources.list.d/d
     && wget -O- https://www.dotdeb.org/dotdeb.gpg | apt-key add - \
     && apt update
 
-RUN apt install -y php7.0 php7.0-fpm php7.0-mysql php7.0-curl php7.0-json php7.0-gd php7.0-mcrypt php7.0-msgpack \
-                   php7.0-memcached php7.0-intl php7.0-sqlite3 php7.0-gmp php7.0-geoip php7.0-mbstring php7.0-xml \
-                   php7.0-zip
+RUN apt install -y php7.0 php7.0-dev php7.0-fpm php7.0-mysql php7.0-curl php7.0-json php7.0-gd php7.0-mcrypt \
+ php7.0-msgpack php7.0-memcached php7.0-intl php7.0-sqlite3 php7.0-gmp php7.0-geoip php7.0-mbstring php7.0-xml \
+ php7.0-zip
 
 # Install php tools
 RUN mkdir -p /usr/bin \
@@ -56,6 +56,8 @@ RUN composer global require hirak/prestissimo
 ENV PHPBREW_ROOT /home/jenkins/.phpbrew
 ENV PHPBREW_HOME /home/jenkins/.phpbrew
 ENV PHPBREW_SET_PROMPT 1
+ENV PHPBREW_PHP php-7.1.7
+
 RUN phpbrew init \
   && echo 'source $HOME/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
   && /bin/bash -c "source /home/jenkins/.phpbrew/bashrc"
@@ -63,6 +65,15 @@ RUN phpbrew init \
 # Install several PHP versions
 RUN phpbrew install -j $(nproc) 7.0.21 +default \
  && phpbrew install -j $(nproc) 7.1.7 +default
+
+# Install several extensions for each PHP version
+ENV PHPBREW_PHP php-7.0.21
+RUN phpbrew ext install xdebug latest \
+ && phpbrew ext install apcu latest
+
+ENV PHPBREW_PHP php-7.1.7
+RUN phpbrew ext install xdebug latest \
+ && phpbrew ext install apcu latest
 
 # Create aliases to call PHP more easyly
 RUN alias php-7.0="php-7.0.21" \
