@@ -68,11 +68,11 @@ RUN phpbrew install -j $(nproc) 7.0.21 +default \
 
 # Install several extensions for each PHP version
 ENV PHPBREW_PHP php-7.0.21
-RUN phpbrew ext install xdebug latest \
+RUN phpbrew ext install xdebug 2.5.5 \
  && phpbrew ext install apcu latest
 
 ENV PHPBREW_PHP php-7.1.7
-RUN phpbrew ext install xdebug latest \
+RUN phpbrew ext install xdebug 2.5.5 \
  && phpbrew ext install apcu latest
 
 # Create aliases to call PHP more easyly
