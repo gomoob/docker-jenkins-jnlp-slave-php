@@ -59,8 +59,7 @@ ENV PHPBREW_SET_PROMPT 1
 ENV PHPBREW_PHP php-7.1.7
 
 RUN phpbrew init \
-  && echo 'source $HOME/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
-  && /bin/bash -c "source /home/jenkins/.phpbrew/bashrc"
+  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc
 
 # Install several PHP versions
 RUN phpbrew install -j $(nproc) 7.0.21 +default \
@@ -68,13 +67,33 @@ RUN phpbrew install -j $(nproc) 7.0.21 +default \
 
 # Install several extensions for each PHP version
 ENV PHPBREW_PHP php-7.0.21
-RUN phpbrew ext install xdebug 2.5.5 \
- && phpbrew ext install apcu latest
+RUN phpbrew switch 7.0.21 \
+ && phpbrew ext install --downloader wget xdebug latest \
+ && phpbrew ext install --downloader wget apcu latest
 
 ENV PHPBREW_PHP php-7.1.7
-RUN phpbrew ext install xdebug 2.5.5 \
- && phpbrew ext install apcu latest
+RUN phpbrew switch 7.1.7 \
+ && phpbrew ext install --downloader wget xdebug latest \
+ && phpbrew ext install --downloader wget apcu latest
+
+# For unknown reasons we encounter the following XDebug loading error, so we manually copy the XDebug library
+#  "Failed loading /usr/lib/php/20151012/xdebug.so:  /usr/lib/php/20151012/xdebug.so: cannot open shared object file: \
+#   No such file or directory"
+RUN echo "zend_extension=/home/jenkins/.phpbrew/php/php-7.0.21/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" \
+    > /home/jenkins/.phpbrew/php/php-7.0.21/var/db/xdebug.ini
+RUN echo "zend_extension=/home/jenkins/.phpbrew/php/php-7.1.7/lib/php/extensions/no-debug-non-zts-20160303/xdebug.so" \
+    > /home/jenkins/.phpbrew/php/php-7.1.7/var/db/xdebug.ini
 
 # Create aliases to call PHP more easyly
-RUN alias php-7.0="php-7.0.21" \
- && alias php-7.1="php-7.1.7"
+USER root
+RUN echo '#!/bin/bash\n/home/jenkins/.phpbrew/php/php-7.0.21/bin/php "$@"' > /usr/bin/php-7.0 \
+ && echo '#!/bin/bash\n/home/jenkins/.phpbrew/php/php-7.0.21/bin/php "$@"' > /usr/bin/php-7.0.21 \
+ && echo '#!/bin/bash\n/home/jenkins/.phpbrew/php/php-7.1.7/bin/php "$@"' > /usr/bin/php-7.1 \
+ && echo '#!/bin/bash\n/home/jenkins/.phpbrew/php/php-7.1.7/bin/php "$@"' > /usr/bin/php-7.1.7 \
+ && chmod +x /usr/bin/php-7.0 \
+ && chmod +x /usr/bin/php-7.0.21 \
+ && chmod +x /usr/bin/php-7.1 \
+ && chmod +x /usr/bin/php-7.1.7
+USER jenkins
+
+ENTRYPOINT ["jenkins-slave"]
