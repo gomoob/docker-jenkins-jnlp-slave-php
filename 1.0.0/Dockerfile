@@ -8,7 +8,8 @@ USER root
 RUN apt-get update \
  && apt-get install -y apt-utils gcc g++ make automake libxml2 libxml2-dev libxml2-utils libssl-dev lcov \
                        systemtap-sdt-dev libbz2-dev libgmp-dev libgmp3-dev libicu-dev libmcrypt-dev libreadline-dev \
-                       libxslt1-dev openssl libssl-dev libcurl4-openssl-dev libcurl4-openssl-dev pkg-config libsasl2-dev
+                       libxslt1-dev openssl libssl-dev libcurl4-openssl-dev libcurl4-openssl-dev pkg-config \
+                       libsasl2-dev postgresql-server-dev-all
 
 # Install PHP (required by phpbrew)
 RUN echo "deb http://packages.dotdeb.org jessie all" > /etc/apt/sources.list.d/dotdeb.list \
@@ -67,8 +68,8 @@ RUN phpbrew init \
   && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc
 
 # Install several PHP versions
-RUN phpbrew install -j $(nproc) 7.0.21 +default \
- && phpbrew install -j $(nproc) 7.1.7 +default
+RUN phpbrew install -j $(nproc) 7.0.21 +default +dbs \
+ && phpbrew install -j $(nproc) 7.1.7 +default +dbs
 
 # Install several extensions for each PHP version
 ENV PHPBREW_PHP php-7.0.21
@@ -104,15 +105,20 @@ RUN echo "zend_extension=$PHPBREW_HOME/php/php-7.1.7/lib/php/extensions/no-debug
     > $PHPBREW_HOME/php/php-7.1.7/var/db/10-xdebug.ini
 
 # Create aliases to call PHP more easyly
+COPY php/php-7.0.21                /usr/bin/php-7.0.21
+COPY php/php-7.0.21                /usr/bin/php-7.0
+COPY php/php-7.1.7                 /usr/bin/php-7.1.7
+COPY php/php-7.1.7                 /usr/bin/php-7.1
+COPY php/php-without-xdebug-7.0.21 /usr/bin/php-without-xdebug-7.0.21
+COPY php/php-without-xdebug-7.0.21 /usr/bin/php-without-xdebug-7.0
+COPY php/php-without-xdebug-7.1.7  /usr/bin/php-without-xdebug-7.1.7
+COPY php/php-without-xdebug-7.1.7  /usr/bin/php-without-xdebug-7.1
+
 USER root
-RUN echo '#!/bin/bash\n/home/jenkins/.phpbrew/php/php-7.0.21/bin/php "$@"' > /usr/bin/php-7.0 \
- && echo '#!/bin/bash\n/home/jenkins/.phpbrew/php/php-7.0.21/bin/php "$@"' > /usr/bin/php-7.0.21 \
- && echo '#!/bin/bash\n/home/jenkins/.phpbrew/php/php-7.1.7/bin/php "$@"' > /usr/bin/php-7.1 \
- && echo '#!/bin/bash\n/home/jenkins/.phpbrew/php/php-7.1.7/bin/php "$@"' > /usr/bin/php-7.1.7 \
- && chmod +x /usr/bin/php-7.0 \
- && chmod +x /usr/bin/php-7.0.21 \
- && chmod +x /usr/bin/php-7.1 \
- && chmod +x /usr/bin/php-7.1.7
+RUN rm /usr/bin/php \
+ && cp /usr/bin/php-7.1.7 /usr/bin/php \
+ && cp /usr/bin/php-without-xdebug-7.1.7 /usr/bin/php-without-xdebug \
+ && chmod +x /usr/bin/php-*
 USER jenkins
 
 ENTRYPOINT ["jenkins-slave"]

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+PHP=/home/jenkins/.phpbrew/php/php-7.0.21/bin/php
+
+# see https://stackoverflow.com/questions/31083195/disabling-xdebug-when-running-composer
+temporaryPath="$(mktemp -t php.XXXX).ini"
+
+# Using awk to ensure that files ending without newlines do not lead to configuration error
+$PHP -i | grep "\.ini" | grep -o -e '\(/[a-z0-9._-]\+\)\+\.ini' | grep -v xdebug | xargs awk 'FNR==1{print ""}1' > "$temporaryPath"
+
+$PHP -n -c "$temporaryPath" "$@"
+rm -f "$temporaryPath"

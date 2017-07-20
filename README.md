@@ -12,8 +12,11 @@ Docker slave container and adds several additional tools to build PHP projects.
 
 The following tools can be called under the Jenkins slave.
 
-* `php-7.0.21` or simply `php-7.0` to execute PHP 7.0.x ;
-* `php-7.1.7` or simply `php-7.1` to execute PHP 7.1.x ;
+* `php-7.1.7` or `php-7.1` or `php` to execute PHP 7.1.x with Xdebug enabled ;
+* `php-without-xdebug-7.1.7` or `php-without-xdebug-7.1` or `php-without-xdebug` to execute PHP 7.1.x without Xdebug
+  enabled ;
+* `php-7.0.21` or `php-7.0` to execute PHP 7.0.x with Xdebug enabled ;
+* `php-without-xdebug-7.0.21` or `php-without-xdebug-7.0` to execute PHP 7.0.x without Xdebug enabled ;
 * `phpunit` ;
 * `composer` (based on [prestissimo](https://github.com/hirak/prestissimo "prestissimo") ;
 * `phpmd` ;
@@ -26,7 +29,8 @@ The following tools can be called under the Jenkins slave.
 Each version of PHP available is compiled with the following extensions.
 
 `bcmath`, `bz2`, `calendar`, `cli`, `ctype`, `dom`, `fileinfo`, `filter`, `ipc`, `json`, `mbregex`, `mbstring`, `mhash`,
-`mcrypt`, `pcntl`, `pcre`, `pdo`, `phar`, `posix`, `readline`, `sockets`, `tokenizer`, `xml`, `curl`, `openssl`, `zip`.
+`mcrypt`, `pcntl`, `pcre`, `pdo`, `phar`, `posix`, `readline`, `sockets`, `tokenizer`, `xml`, `curl`, `openssl`, `zip`,
+`sqlite`, `mysql`, `pgsql`
 
 In addition the following extensions are also installed with each PHP executable.
 
