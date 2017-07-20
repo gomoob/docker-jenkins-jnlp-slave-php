@@ -118,7 +118,7 @@ USER root
 RUN rm /usr/bin/php \
  && cp /usr/bin/php-7.1.7 /usr/bin/php \
  && cp /usr/bin/php-without-xdebug-7.1.7 /usr/bin/php-without-xdebug \
- && chmod +x /usr/bin/php-*
+ && chmod +x /usr/bin/php*
 USER jenkins
 
 ENTRYPOINT ["jenkins-slave"]
