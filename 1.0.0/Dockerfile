@@ -6,8 +6,9 @@ USER root
 
 # Install utility libraries and tools
 RUN apt-get update \
- && apt-get install -y gcc g++ make automake libxml2 libxml2-dev libxml2-utils libssl-dev lcov systemtap-sdt-dev \
-                       libbz2-dev libgmp-dev libgmp3-dev libicu-dev libmcrypt-dev libreadline-dev libxslt1-dev
+ && apt-get install -y apt-utils gcc g++ make automake libxml2 libxml2-dev libxml2-utils libssl-dev lcov \
+                       systemtap-sdt-dev libbz2-dev libgmp-dev libgmp3-dev libicu-dev libmcrypt-dev libreadline-dev \
+                       libxslt1-dev openssl libssl-dev libcurl4-openssl-dev libcurl4-openssl-dev pkg-config libsasl2-dev
 
 # Install PHP (required by phpbrew)
 RUN echo "deb http://packages.dotdeb.org jessie all" > /etc/apt/sources.list.d/dotdeb.list \
@@ -19,10 +20,14 @@ RUN apt install -y php7.0 php7.0-dev php7.0-fpm php7.0-mysql php7.0-curl php7.0-
  php7.0-zip
 
 # Install php tools
+ENV COMPOSER_VERSION 1.4.2
+ENV PHPMD_VERSION 2.6.0
+ENV PHPUNIT_VERSION 6.2.3
+
 RUN mkdir -p /usr/bin \
-  && wget -q -O /usr/bin/phpunit https://phar.phpunit.de/phpunit.phar && chmod +x /usr/bin/phpunit \
-  && wget -q -O /usr/bin/composer https://getcomposer.org/composer.phar && chmod +x /usr/bin/composer \
-  && wget -q -O /usr/bin/phpmd http://static.phpmd.org/php/latest/phpmd.phar && chmod +x /usr/bin/phpmd \
+  && wget -q -O /usr/bin/phpunit https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar && chmod +x /usr/bin/phpunit \
+  && wget -q -O /usr/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar && chmod +x /usr/bin/composer \
+  && wget -q -O /usr/bin/phpmd http://static.phpmd.org/php/$PHPMD_VERSION/phpmd.phar && chmod +x /usr/bin/phpmd \
   && wget -q -O /usr/bin/sami http://get.sensiolabs.org/sami.phar && chmod +x /usr/bin/sami \
   && wget -q -O /usr/bin/phpcov https://phar.phpunit.de/phpcov.phar && chmod +x /usr/bin/phpcov \
   && wget -q -O /usr/bin/phpcpd https://phar.phpunit.de/phpcpd.phar && chmod +x /usr/bin/phpcpd \
@@ -69,20 +74,34 @@ RUN phpbrew install -j $(nproc) 7.0.21 +default \
 ENV PHPBREW_PHP php-7.0.21
 RUN phpbrew switch 7.0.21 \
  && phpbrew ext install --downloader wget xdebug latest \
- && phpbrew ext install --downloader wget apcu latest
+ && phpbrew ext install --downloader wget apcu latest \
+ && phpbrew ext install --downloader wget apcu_bc latest \
+ && phpbrew ext install --downloader wget mongodb latest
 
 ENV PHPBREW_PHP php-7.1.7
 RUN phpbrew switch 7.1.7 \
  && phpbrew ext install --downloader wget xdebug latest \
- && phpbrew ext install --downloader wget apcu latest
+ && phpbrew ext install --downloader wget apcu latest \
+ && phpbrew ext install --downloader wget apcu_bc latest \
+ && phpbrew ext install --downloader wget mongodb latest
+
+# Update PHP ini file names to enforce loading in a specific order
+RUN mv $PHPBREW_HOME/php/php-7.0.21/var/db/xdebug.ini  $PHPBREW_HOME/php/php-7.0.21/var/db/10-xdebug.ini \
+ && mv $PHPBREW_HOME/php/php-7.0.21/var/db/apcu.ini    $PHPBREW_HOME/php/php-7.0.21/var/db/20-apcu.ini \
+ && mv $PHPBREW_HOME/php/php-7.0.21/var/db/apc.ini     $PHPBREW_HOME/php/php-7.0.21/var/db/30-apcu.ini \
+ && mv $PHPBREW_HOME/php/php-7.0.21/var/db/mongodb.ini $PHPBREW_HOME/php/php-7.0.21/var/db/40-mongodb.ini \
+ && mv $PHPBREW_HOME/php/php-7.1.7/var/db/xdebug.ini   $PHPBREW_HOME/php/php-7.1.7/var/db/10-xdebug.ini \
+ && mv $PHPBREW_HOME/php/php-7.1.7/var/db/apcu.ini     $PHPBREW_HOME/php/php-7.1.7/var/db/20-apcu.ini \
+ && mv $PHPBREW_HOME/php/php-7.1.7/var/db/apc.ini      $PHPBREW_HOME/php/php-7.1.7/var/db/30-apcu.ini \
+ && mv $PHPBREW_HOME/php/php-7.1.7/var/db/mongodb.ini  $PHPBREW_HOME/php/php-7.1.7/var/db/40-mongodb.ini
 
 # For unknown reasons we encounter the following XDebug loading error, so we manually copy the XDebug library
 #  "Failed loading /usr/lib/php/20151012/xdebug.so:  /usr/lib/php/20151012/xdebug.so: cannot open shared object file: \
 #   No such file or directory"
-RUN echo "zend_extension=/home/jenkins/.phpbrew/php/php-7.0.21/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" \
-    > /home/jenkins/.phpbrew/php/php-7.0.21/var/db/xdebug.ini
-RUN echo "zend_extension=/home/jenkins/.phpbrew/php/php-7.1.7/lib/php/extensions/no-debug-non-zts-20160303/xdebug.so" \
-    > /home/jenkins/.phpbrew/php/php-7.1.7/var/db/xdebug.ini
+RUN echo "zend_extension=$PHPBREW_HOME/php/php-7.0.21/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" \
+    > $PHPBREW_HOME/php/php-7.0.21/var/db/10-xdebug.ini
+RUN echo "zend_extension=$PHPBREW_HOME/php/php-7.1.7/lib/php/extensions/no-debug-non-zts-20160303/xdebug.so" \
+    > $PHPBREW_HOME/php/php-7.1.7/var/db/10-xdebug.ini
 
 # Create aliases to call PHP more easyly
 USER root

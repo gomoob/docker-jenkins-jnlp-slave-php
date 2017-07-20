@@ -5,7 +5,7 @@
 # What is jenkins-jnlp-slave-php ?
 
 [gomoob/jenkins-jnlp-slave-php](https://github.com/gomoob/docker-jenkins-jnlp-slave-php "gomoob/jenkins-jnlp-slave-php")
-is a Docker Jenkins slave image using JNLP to establish connection and providing PHP build tools
+is a Docker Jenkins slave image using JNLP to establish connection and providing PHP build tools.
 
 The container is based on the official Jenkins [jenkinsci/jnlp-slave](https://hub.docker.com/r/jenkinsci/jnlp-slave "jenkinsci/jnlp-slave")
 Docker slave container and adds several additional tools to build PHP projects.
@@ -30,7 +30,7 @@ Each version of PHP available is compiled with the following extensions.
 
 In addition the following extensions are also installed with each PHP executable.
 
-`apcu`, `xdebug`
+`apcu`, `apcu_bc`, `mongodb`, `xdebug`
 
 # How to use this image.
 
