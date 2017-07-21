@@ -9,7 +9,7 @@ RUN apt-get update \
  && apt-get install -y apt-utils gcc g++ make automake libxml2 libxml2-dev libxml2-utils libssl-dev lcov \
                        systemtap-sdt-dev libbz2-dev libgmp-dev libgmp3-dev libicu-dev libmcrypt-dev libreadline-dev \
                        libxslt1-dev openssl libssl-dev libcurl4-openssl-dev libcurl4-openssl-dev pkg-config \
-                       libsasl2-dev postgresql-server-dev-all
+                       libsasl2-dev postgresql-server-dev-all libjpeg-dev libpng12-dev
 
 # Install PHP (required by phpbrew)
 RUN echo "deb http://packages.dotdeb.org jessie all" > /etc/apt/sources.list.d/dotdeb.list \
@@ -68,8 +68,10 @@ RUN phpbrew init \
   && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc
 
 # Install several PHP versions
-RUN phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd \
- && phpbrew install -j $(nproc) 7.1.7 +default +dbs +gd
+RUN phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd -- \
+ --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
+ && phpbrew install -j $(nproc) 7.1.7 +default +dbs +gd -- \
+ --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr
 
 # Install several extensions for each PHP version
 ENV PHPBREW_PHP php-7.0.21
@@ -86,15 +88,21 @@ RUN phpbrew switch 7.1.7 \
  && phpbrew ext install --downloader wget apcu_bc latest \
  && phpbrew ext install --downloader wget mongodb latest
 
+# Enable additional extensions compiles with PHP before, we do it here to have the '../var/db' folder created
+RUN echo 'extension=gd.so' > $PHPBREW_HOME/php/php-7.0.21/var/db/gd.ini \
+ && echo 'extension=gd.so' > $PHPBREW_HOME/php/php-7.1.7/var/db/gd.ini
+
 # Update PHP ini file names to enforce loading in a specific order
 RUN mv $PHPBREW_HOME/php/php-7.0.21/var/db/xdebug.ini  $PHPBREW_HOME/php/php-7.0.21/var/db/10-xdebug.ini \
  && mv $PHPBREW_HOME/php/php-7.0.21/var/db/apcu.ini    $PHPBREW_HOME/php/php-7.0.21/var/db/20-apcu.ini \
  && mv $PHPBREW_HOME/php/php-7.0.21/var/db/apc.ini     $PHPBREW_HOME/php/php-7.0.21/var/db/30-apcu.ini \
- && mv $PHPBREW_HOME/php/php-7.0.21/var/db/mongodb.ini $PHPBREW_HOME/php/php-7.0.21/var/db/40-mongodb.ini \
+ && mv $PHPBREW_HOME/php/php-7.0.21/var/db/gd.ini      $PHPBREW_HOME/php/php-7.0.21/var/db/40-gd.ini \
+ && mv $PHPBREW_HOME/php/php-7.0.21/var/db/mongodb.ini $PHPBREW_HOME/php/php-7.0.21/var/db/50-mongodb.ini \
  && mv $PHPBREW_HOME/php/php-7.1.7/var/db/xdebug.ini   $PHPBREW_HOME/php/php-7.1.7/var/db/10-xdebug.ini \
  && mv $PHPBREW_HOME/php/php-7.1.7/var/db/apcu.ini     $PHPBREW_HOME/php/php-7.1.7/var/db/20-apcu.ini \
  && mv $PHPBREW_HOME/php/php-7.1.7/var/db/apc.ini      $PHPBREW_HOME/php/php-7.1.7/var/db/30-apcu.ini \
- && mv $PHPBREW_HOME/php/php-7.1.7/var/db/mongodb.ini  $PHPBREW_HOME/php/php-7.1.7/var/db/40-mongodb.ini
+ && mv $PHPBREW_HOME/php/php-7.1.7/var/db/gd.ini       $PHPBREW_HOME/php/php-7.1.7/var/db/40-gd.ini \
+ && mv $PHPBREW_HOME/php/php-7.1.7/var/db/mongodb.ini  $PHPBREW_HOME/php/php-7.1.7/var/db/50-mongodb.ini
 
 # For unknown reasons we encounter the following XDebug loading error, so we manually copy the XDebug library
 #  "Failed loading /usr/lib/php/20151012/xdebug.so:  /usr/lib/php/20151012/xdebug.so: cannot open shared object file: \
