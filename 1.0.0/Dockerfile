@@ -68,8 +68,8 @@ RUN phpbrew init \
   && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc
 
 # Install several PHP versions
-RUN phpbrew install -j $(nproc) 7.0.21 +default +dbs \
- && phpbrew install -j $(nproc) 7.1.7 +default +dbs
+RUN phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd \
+ && phpbrew install -j $(nproc) 7.1.7 +default +dbs +gd
 
 # Install several extensions for each PHP version
 ENV PHPBREW_PHP php-7.0.21
