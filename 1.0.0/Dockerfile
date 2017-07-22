@@ -64,9 +64,9 @@ RUN composer global require hirak/prestissimo \
 # Install several PHP versions
  && phpbrew init \
  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
- && phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd +iconv +intl -- \
+ && phpbrew install -j $(nproc) 7.0.21 +default +dbs +exif +gd +iconv +intl -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
- && phpbrew install -j $(nproc) 7.1.7 +default +dbs +gd +iconv +intl -- \
+ && phpbrew install -j $(nproc) 7.1.7 +default +dbs +exif +gd +iconv +intl -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
 
  && printf "\n\n==== Install PHP extensions for PHP 7.0.21 ====\n" \

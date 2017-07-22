@@ -35,7 +35,7 @@ Each version of PHP available is compiled with the following extensions.
 
 `bcmath`, `bz2`, `calendar`, `cli`, `ctype`, `dom`, `fileinfo`, `filter`, `ipc`, `json`, `mbregex`, `mbstring`, `mhash`,
 `mcrypt`, `pcntl`, `pcre`, `pdo`, `phar`, `posix`, `readline`, `sockets`, `tokenizer`, `xml`, `curl`, `openssl`, `zip`,
-`sqlite`, `mysql`, `pgsql`, `gd`, `iconv`, `intl`
+`sqlite`, `mysql`, `pgsql`, `gd`, `iconv`, `intl`, `exif`
 
 ## Additional extensions
 
