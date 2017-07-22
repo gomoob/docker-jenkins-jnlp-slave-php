@@ -9,7 +9,7 @@ RUN apt-get update \
  && apt-get install -y apt-utils gcc g++ make automake libxml2 libxml2-dev libxml2-utils libssl-dev lcov \
                        systemtap-sdt-dev libbz2-dev libgmp-dev libgmp3-dev libicu-dev libmcrypt-dev libreadline-dev \
                        libxslt1-dev openssl libssl-dev libcurl4-openssl-dev libcurl4-openssl-dev pkg-config \
-                       libsasl2-dev postgresql-server-dev-all libjpeg-dev libpng12-dev
+                       libsasl2-dev postgresql-server-dev-all libjpeg-dev libpng12-dev mediainfo
 
 # Install PHP (required by phpbrew)
 RUN echo "deb http://packages.dotdeb.org jessie all" > /etc/apt/sources.list.d/dotdeb.list \
@@ -64,11 +64,10 @@ ENV PHPBREW_HOME /home/jenkins/.phpbrew
 ENV PHPBREW_SET_PROMPT 1
 ENV PHPBREW_PHP php-7.1.7
 
-RUN phpbrew init \
-  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc
-
 # Install several PHP versions
-RUN phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd +iconv -- \
+RUN phpbrew init \
+ && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
+ && phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd +iconv -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
  && phpbrew install -j $(nproc) 7.1.7 +default +dbs +gd +iconv -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr
@@ -76,40 +75,39 @@ RUN phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd +iconv -- \
 # Install several extensions for each PHP version
 ENV PHPBREW_PHP php-7.0.21
 RUN phpbrew switch 7.0.21 \
- && phpbrew ext install --downloader wget xdebug latest \
- && phpbrew ext install --downloader wget apcu latest \
- && phpbrew ext install --downloader wget apcu_bc latest \
- && phpbrew ext install --downloader wget mongodb latest
+ && phpbrew ext install --downloader wget xdebug  latest && phpbrew ext clean xdebug \
+ && phpbrew ext install --downloader wget apcu    latest && phpbrew ext clean apcu \
+ && phpbrew ext install --downloader wget apcu_bc latest && phpbrew ext clean apcu_bc \
+ && phpbrew ext install --downloader wget mongodb latest && phpbrew ext clean mongodb
 
 ENV PHPBREW_PHP php-7.1.7
 RUN phpbrew switch 7.1.7 \
- && phpbrew ext install --downloader wget xdebug latest \
- && phpbrew ext install --downloader wget apcu latest \
- && phpbrew ext install --downloader wget apcu_bc latest \
- && phpbrew ext install --downloader wget mongodb latest
+ && phpbrew ext install --downloader wget xdebug  latest && phpbrew ext clean xdebug \
+ && phpbrew ext install --downloader wget apcu    latest && phpbrew ext clean apcu \
+ && phpbrew ext install --downloader wget apcu_bc latest && phpbrew ext clean apcu_bc \
+ && phpbrew ext install --downloader wget mongodb latest && phpbrew ext clean mongodb
 
-# Enable additional extensions compiles with PHP before, we do it here to have the '../var/db' folder created
-RUN echo 'extension=gd.so' > $PHPBREW_HOME/php/php-7.0.21/var/db/gd.ini \
- && echo 'extension=gd.so' > $PHPBREW_HOME/php/php-7.1.7/var/db/gd.ini
+RUN phpbrew clean php-7.0.21 \
+ && phpbrew clean php-7.1.7
 
 # Update PHP ini file names to enforce loading in a specific order
-RUN mv $PHPBREW_HOME/php/php-7.0.21/var/db/xdebug.ini  $PHPBREW_HOME/php/php-7.0.21/var/db/10-xdebug.ini \
- && mv $PHPBREW_HOME/php/php-7.0.21/var/db/apcu.ini    $PHPBREW_HOME/php/php-7.0.21/var/db/20-apcu.ini \
- && mv $PHPBREW_HOME/php/php-7.0.21/var/db/apc.ini     $PHPBREW_HOME/php/php-7.0.21/var/db/30-apcu.ini \
- && mv $PHPBREW_HOME/php/php-7.0.21/var/db/gd.ini      $PHPBREW_HOME/php/php-7.0.21/var/db/40-gd.ini \
- && mv $PHPBREW_HOME/php/php-7.0.21/var/db/mongodb.ini $PHPBREW_HOME/php/php-7.0.21/var/db/50-mongodb.ini \
- && mv $PHPBREW_HOME/php/php-7.1.7/var/db/xdebug.ini   $PHPBREW_HOME/php/php-7.1.7/var/db/10-xdebug.ini \
- && mv $PHPBREW_HOME/php/php-7.1.7/var/db/apcu.ini     $PHPBREW_HOME/php/php-7.1.7/var/db/20-apcu.ini \
- && mv $PHPBREW_HOME/php/php-7.1.7/var/db/apc.ini      $PHPBREW_HOME/php/php-7.1.7/var/db/30-apcu.ini \
- && mv $PHPBREW_HOME/php/php-7.1.7/var/db/gd.ini       $PHPBREW_HOME/php/php-7.1.7/var/db/40-gd.ini \
- && mv $PHPBREW_HOME/php/php-7.1.7/var/db/mongodb.ini  $PHPBREW_HOME/php/php-7.1.7/var/db/50-mongodb.ini
+RUN rm $PHPBREW_HOME/php/php-7.0.21/var/db/* \
+ && rm $PHPBREW_HOME/php/php-7.1.7/var/db/*
+
+COPY ini/* $PHPBREW_HOME/php/php-7.0.21/var/db/
+COPY ini/* $PHPBREW_HOME/php/php-7.1.7/var/db/
+
+USER root
+RUN chown jenkins:jenkins $PHPBREW_HOME/php/php-7.0.21/var/db/* \
+ && chown jenkins:jenkins $PHPBREW_HOME/php/php-7.1.7/var/db/*
+USER jenkins
 
 # For unknown reasons we encounter the following XDebug loading error, so we manually copy the XDebug library
 #  "Failed loading /usr/lib/php/20151012/xdebug.so:  /usr/lib/php/20151012/xdebug.so: cannot open shared object file: \
 #   No such file or directory"
 RUN echo "zend_extension=$PHPBREW_HOME/php/php-7.0.21/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" \
-    > $PHPBREW_HOME/php/php-7.0.21/var/db/10-xdebug.ini
-RUN echo "zend_extension=$PHPBREW_HOME/php/php-7.1.7/lib/php/extensions/no-debug-non-zts-20160303/xdebug.so" \
+    > $PHPBREW_HOME/php/php-7.0.21/var/db/10-xdebug.ini \
+ && echo "zend_extension=$PHPBREW_HOME/php/php-7.1.7/lib/php/extensions/no-debug-non-zts-20160303/xdebug.so" \
     > $PHPBREW_HOME/php/php-7.1.7/var/db/10-xdebug.ini
 
 # Create aliases to call PHP more easyly
@@ -122,6 +120,7 @@ COPY php/php-without-xdebug-7.0.21 /usr/bin/php-without-xdebug-7.0
 COPY php/php-without-xdebug-7.1.7  /usr/bin/php-without-xdebug-7.1.7
 COPY php/php-without-xdebug-7.1.7  /usr/bin/php-without-xdebug-7.1
 
+# The 'php' and 'php-without-xdebug' commands should call the most recent PHP versions
 USER root
 RUN rm /usr/bin/php \
  && cp /usr/bin/php-7.1.7 /usr/bin/php \

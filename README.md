@@ -10,6 +10,8 @@ is a Docker Jenkins slave image using JNLP to establish connection and providing
 The container is based on the official Jenkins [jenkinsci/jnlp-slave](https://hub.docker.com/r/jenkinsci/jnlp-slave "jenkinsci/jnlp-slave")
 Docker slave container and adds several additional tools to build PHP projects.
 
+## Available executables
+
 The following tools can be called under the Jenkins slave.
 
 * `php-7.1.7` or `php-7.1` or `php` to execute PHP 7.1.x with Xdebug enabled ;
@@ -24,13 +26,18 @@ The following tools can be called under the Jenkins slave.
 * `phpcov` ;
 * `phpcpd` ;
 * `phploc` ;
-* `box`.
+* `box` ;
+* `mediainfo`.
+
+## Extensions included at PHP compilation
 
 Each version of PHP available is compiled with the following extensions.
 
 `bcmath`, `bz2`, `calendar`, `cli`, `ctype`, `dom`, `fileinfo`, `filter`, `ipc`, `json`, `mbregex`, `mbstring`, `mhash`,
 `mcrypt`, `pcntl`, `pcre`, `pdo`, `phar`, `posix`, `readline`, `sockets`, `tokenizer`, `xml`, `curl`, `openssl`, `zip`,
 `sqlite`, `mysql`, `pgsql`, `gd`, `iconv`
+
+## Additional extensions
 
 In addition the following extensions are also installed with each PHP executable.
 
