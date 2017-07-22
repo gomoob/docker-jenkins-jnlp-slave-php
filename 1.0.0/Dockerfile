@@ -67,9 +67,9 @@ ENV PHPBREW_PHP php-7.1.7
 # Install several PHP versions
 RUN phpbrew init \
  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
- && phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd +iconv -- \
+ && phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd +iconv +intl -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
- && phpbrew install -j $(nproc) 7.1.7 +default +dbs +gd +iconv -- \
+ && phpbrew install -j $(nproc) 7.1.7 +default +dbs +gd +iconv +intl -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr
 
 # Install several extensions for each PHP version
