@@ -4,95 +4,97 @@ MAINTAINER Baptiste Gaillard <baptiste.gaillard@gomoob.com>
 # see https://github.com/phpbrew/phpbrew-container
 USER root
 
-# Install utility libraries and tools
-RUN apt-get update \
+ENV COMPOSER_VERSION=1.4.2 \
+    PHPMD_VERSION=2.6.0 \
+    PHPUNIT_VERSION=6.2.3 \
+    PHPBREW_ROOT=/home/jenkins/.phpbrew \
+    PHPBREW_HOME=/home/jenkins/.phpbrew \
+    PHPBREW_SET_PROMPT=1 \
+    PHPBREW_PHP=php-7.1.7
+
+RUN printf "\n\n==== Install utility tools and libraries ====\n" \
+ && apt-get update \
  && apt-get install -y apt-utils gcc g++ make automake libxml2 libxml2-dev libxml2-utils libssl-dev lcov \
                        systemtap-sdt-dev libbz2-dev libgmp-dev libgmp3-dev libicu-dev libmcrypt-dev libreadline-dev \
                        libxslt1-dev openssl libssl-dev libcurl4-openssl-dev libcurl4-openssl-dev pkg-config \
-                       libsasl2-dev postgresql-server-dev-all libjpeg-dev libpng12-dev mediainfo
+                       libsasl2-dev postgresql-server-dev-all libjpeg-dev libpng12-dev mediainfo \
 
-# Install PHP (required by phpbrew)
-RUN echo "deb http://packages.dotdeb.org jessie all" > /etc/apt/sources.list.d/dotdeb.list \
-    && wget -O- https://www.dotdeb.org/dotdeb.gpg | apt-key add - \
-    && apt update
+ && printf "\n\n==== Install PHP (required to install phpbrew after ====\n" \
+ && echo "deb http://packages.dotdeb.org jessie all" > /etc/apt/sources.list.d/dotdeb.list \
+ && wget -O- https://www.dotdeb.org/dotdeb.gpg | apt-key add - \
+ && apt update \
+ && apt install -y php7.0 php7.0-dev php7.0-fpm php7.0-mysql php7.0-curl php7.0-json php7.0-gd php7.0-mcrypt \
+                   php7.0-msgpack php7.0-memcached php7.0-intl php7.0-sqlite3 php7.0-gmp php7.0-geoip php7.0-mbstring \
+                   php7.0-xml php7.0-zip \
 
-RUN apt install -y php7.0 php7.0-dev php7.0-fpm php7.0-mysql php7.0-curl php7.0-json php7.0-gd php7.0-mcrypt \
- php7.0-msgpack php7.0-memcached php7.0-intl php7.0-sqlite3 php7.0-gmp php7.0-geoip php7.0-mbstring php7.0-xml \
- php7.0-zip
+ && printf "\n\n==== Install PHP tools ====\n" \
+ && mkdir -p /usr/bin \
+ && wget -q -O /usr/bin/phpunit https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar && chmod +x /usr/bin/phpunit \
+ && wget -q -O /usr/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar && chmod +x /usr/bin/composer \
+ && wget -q -O /usr/bin/phpmd http://static.phpmd.org/php/$PHPMD_VERSION/phpmd.phar && chmod +x /usr/bin/phpmd \
+ && wget -q -O /usr/bin/sami http://get.sensiolabs.org/sami.phar && chmod +x /usr/bin/sami \
+ && wget -q -O /usr/bin/phpcov https://phar.phpunit.de/phpcov.phar && chmod +x /usr/bin/phpcov \
+ && wget -q -O /usr/bin/phpcpd https://phar.phpunit.de/phpcpd.phar && chmod +x /usr/bin/phpcpd \
+ && wget -q -O /usr/bin/phploc https://phar.phpunit.de/phploc.phar && chmod +x /usr/bin/phploc \
+ && wget -q -O /usr/bin/phptok https://phar.phpunit.de/phptok.phar && chmod +x /usr/bin/phptok \
+ && wget -q -O /usr/bin/box https://github.com/box-project/box2/releases/download/2.5.2/box-2.5.2.phar && chmod +x /usr/bin/box \
 
-# Install php tools
-ENV COMPOSER_VERSION 1.4.2
-ENV PHPMD_VERSION 2.6.0
-ENV PHPUNIT_VERSION 6.2.3
+ && printf "\n\n==== Install phpbrew ====\n" \
+ && curl -L -O https://github.com/phpbrew/phpbrew/raw/master/phpbrew \
+ && chmod +x phpbrew \
+ && mv phpbrew /usr/bin \
 
-RUN mkdir -p /usr/bin \
-  && wget -q -O /usr/bin/phpunit https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar && chmod +x /usr/bin/phpunit \
-  && wget -q -O /usr/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar && chmod +x /usr/bin/composer \
-  && wget -q -O /usr/bin/phpmd http://static.phpmd.org/php/$PHPMD_VERSION/phpmd.phar && chmod +x /usr/bin/phpmd \
-  && wget -q -O /usr/bin/sami http://get.sensiolabs.org/sami.phar && chmod +x /usr/bin/sami \
-  && wget -q -O /usr/bin/phpcov https://phar.phpunit.de/phpcov.phar && chmod +x /usr/bin/phpcov \
-  && wget -q -O /usr/bin/phpcpd https://phar.phpunit.de/phpcpd.phar && chmod +x /usr/bin/phpcpd \
-  && wget -q -O /usr/bin/phploc https://phar.phpunit.de/phploc.phar && chmod +x /usr/bin/phploc \
-  && wget -q -O /usr/bin/phptok https://phar.phpunit.de/phptok.phar && chmod +x /usr/bin/phptok \
-  && wget -q -O /usr/bin/box https://github.com/box-project/box2/releases/download/2.5.2/box-2.5.2.phar && chmod +x /usr/bin/box
+ && printf "\n\n==== Install Node ====\n" \
+ && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
+ && apt-get install -y nodejs \
 
-# Install phpbrew
-RUN curl -L -O https://github.com/phpbrew/phpbrew/raw/master/phpbrew \
-    && chmod +x phpbrew \
-    && mv phpbrew /usr/bin
-
-# Install Node
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - \
- && apt-get install -y nodejs
-
-# Install Yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+ && printf "\n\n==== Install Yarn ====\n" \
+ && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
  && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
- && apt-get update && apt-get install -y yarn
+ && apt-get update && apt-get install -y yarn \
 
-# Install Grunt
-RUN npm install -g grunt-cli
+ && printf "\n\n==== Install Grunt ====\n" \
+ && npm install -g grunt-cli
 
 USER jenkins
 
 # Install prestissimo to speedup composer installs
-RUN composer global require hirak/prestissimo
-
-# Configure phpbrew
-ENV PHPBREW_ROOT /home/jenkins/.phpbrew
-ENV PHPBREW_HOME /home/jenkins/.phpbrew
-ENV PHPBREW_SET_PROMPT 1
-ENV PHPBREW_PHP php-7.1.7
+RUN composer global require hirak/prestissimo \
 
 # Install several PHP versions
-RUN phpbrew init \
+ && phpbrew init \
  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
  && phpbrew install -j $(nproc) 7.0.21 +default +dbs +gd +iconv +intl -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
  && phpbrew install -j $(nproc) 7.1.7 +default +dbs +gd +iconv +intl -- \
- --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr
+ --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
 
-# Install several extensions for each PHP version
-ENV PHPBREW_PHP php-7.0.21
-RUN phpbrew switch 7.0.21 \
+ && printf "\n\n==== Install PHP extensions for PHP 7.0.21 ====\n" \
+ && export PHPBREW_PHP=php-7.0.21 \
+ && phpbrew switch 7.0.21 \
  && phpbrew ext install --downloader wget xdebug  latest && phpbrew ext clean xdebug \
  && phpbrew ext install --downloader wget apcu    latest && phpbrew ext clean apcu \
  && phpbrew ext install --downloader wget apcu_bc latest && phpbrew ext clean apcu_bc \
- && phpbrew ext install --downloader wget mongodb latest && phpbrew ext clean mongodb
+ && phpbrew ext install --downloader wget mongodb latest && phpbrew ext clean mongodb \
 
-ENV PHPBREW_PHP php-7.1.7
-RUN phpbrew switch 7.1.7 \
+ && printf "\n\n==== Install PHP extensions for PHP 7.1.7 ====\n" \
+ && export PHPBREW_PHP=php-7.1.7 \
+ && phpbrew switch 7.1.7 \
  && phpbrew ext install --downloader wget xdebug  latest && phpbrew ext clean xdebug \
  && phpbrew ext install --downloader wget apcu    latest && phpbrew ext clean apcu \
  && phpbrew ext install --downloader wget apcu_bc latest && phpbrew ext clean apcu_bc \
- && phpbrew ext install --downloader wget mongodb latest && phpbrew ext clean mongodb
+ && phpbrew ext install --downloader wget mongodb latest && phpbrew ext clean mongodb \
 
-RUN phpbrew clean php-7.0.21 \
- && phpbrew clean php-7.1.7
+ && phpbrew clean php-7.0.21 \
+ && phpbrew clean php-7.1.7 \
 
 # Update PHP ini file names to enforce loading in a specific order
-RUN rm $PHPBREW_HOME/php/php-7.0.21/var/db/* \
- && rm $PHPBREW_HOME/php/php-7.1.7/var/db/*
+ && rm $PHPBREW_HOME/php/php-7.0.21/var/db/* \
+ && rm $PHPBREW_HOME/php/php-7.1.7/var/db/* \
+
+ && printf "\n\n==== Configure global PHP configuration parameters ====\n" \
+ && sed -i 's/memory_limit = 128M/memory_limit = -1/g' $PHPBREW_HOME/php/php-7.0.21/etc/php.ini \
+ && sed -i 's/memory_limit = 128M/memory_limit = -1/g' $PHPBREW_HOME/php/php-7.1.7/etc/php.ini
 
 COPY ini/* $PHPBREW_HOME/php/php-7.0.21/var/db/
 COPY ini/* $PHPBREW_HOME/php/php-7.1.7/var/db/

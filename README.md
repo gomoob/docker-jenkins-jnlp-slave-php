@@ -43,6 +43,10 @@ In addition the following extensions are also installed with each PHP executable
 
 `apcu`, `apcu_bc`, `mongodb`, `xdebug`
 
+## Specific settings
+
+ * `memory_limit = -1`
+
 # How to use this image.
 
 ## Run with command line
