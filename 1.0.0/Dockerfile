@@ -115,4 +115,9 @@ RUN echo "zend_extension=$PHPBREW_HOME/php/php-7.0.21/lib/php/extensions/no-debu
 # Create aliases to call PHP more easyly
 COPY php/php* /usr/bin/
 
+# Add execution rights to php
+USER root
+RUN chmod +x /usr/bin/php*
+USER jenkins
+
 ENTRYPOINT ["jenkins-slave"]
