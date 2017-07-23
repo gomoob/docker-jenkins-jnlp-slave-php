@@ -14,10 +14,10 @@ ENV COMPOSER_VERSION=1.4.2 \
 
 RUN printf "\n\n==== Install utility tools and libraries ====\n" \
  && apt-get update \
- && apt-get install -y apt-utils gcc g++ make automake libxml2 libxml2-dev libxml2-utils libssl-dev lcov \
-                       systemtap-sdt-dev libbz2-dev libgmp-dev libgmp3-dev libicu-dev libmcrypt-dev libreadline-dev \
-                       libxslt1-dev openssl libssl-dev libcurl4-openssl-dev libcurl4-openssl-dev pkg-config \
-                       libsasl2-dev postgresql-server-dev-all libjpeg-dev libpng12-dev mediainfo \
+ && apt-get install -y apt-utils automake gcc g++ make lcov libbz2-dev libcurl4-openssl-dev libedit-dev libedit2 \
+                       libgmp-dev libgmp3-dev libjpeg-dev libicu-dev libmcrypt-dev libpng12-dev libreadline-dev \
+                       libsasl2-dev libssl-dev libtidy-dev libxml2 libxml2-dev libxml2-utils libxslt1-dev mediainfo \
+                       openssl pkg-config systemtap-sdt-dev postgresql-server-dev-all \
 
  && printf "\n\n==== Install PHP (required to install phpbrew after ====\n" \
  && echo "deb http://packages.dotdeb.org jessie all" > /etc/apt/sources.list.d/dotdeb.list \
@@ -58,15 +58,15 @@ RUN printf "\n\n==== Install utility tools and libraries ====\n" \
 
 USER jenkins
 
-# Install prestissimo to speedup composer installs
-RUN composer global require hirak/prestissimo \
+RUN printf "\n\n==== Install prestissimo ====\n" \
+ && composer global require hirak/prestissimo \
 
-# Install several PHP versions
+ && printf "\n\n==== Install several PHP versions with phpbrew ====\n" \
  && phpbrew init \
  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
- && phpbrew install -j $(nproc) 7.0.21 +default +dbs +exif +gd +iconv +intl +soap -- \
+ && phpbrew install -j $(nproc) 7.0.21 +everything -debug -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
- && phpbrew install -j $(nproc) 7.1.7 +default +dbs +exif +gd +iconv +intl +soap -- \
+ && phpbrew install -j $(nproc) 7.1.7 +everything -debug -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
 
  && printf "\n\n==== Install PHP extensions for PHP 7.0.21 ====\n" \
@@ -107,27 +107,12 @@ USER jenkins
 # For unknown reasons we encounter the following XDebug loading error, so we manually copy the XDebug library
 #  "Failed loading /usr/lib/php/20151012/xdebug.so:  /usr/lib/php/20151012/xdebug.so: cannot open shared object file: \
 #   No such file or directory"
-RUN echo "zend_extension=$PHPBREW_HOME/php/php-7.0.21/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" \
+RUN echo "zend_extension=$PHPBREW_HOME/php/php-7.0.21/lib/php/extensions/no-debug-zts-20151012/xdebug.so" \
     > $PHPBREW_HOME/php/php-7.0.21/var/db/10-xdebug.ini \
- && echo "zend_extension=$PHPBREW_HOME/php/php-7.1.7/lib/php/extensions/no-debug-non-zts-20160303/xdebug.so" \
+ && echo "zend_extension=$PHPBREW_HOME/php/php-7.1.7/lib/php/extensions/no-debug-zts-20160303/xdebug.so" \
     > $PHPBREW_HOME/php/php-7.1.7/var/db/10-xdebug.ini
 
 # Create aliases to call PHP more easyly
-COPY php/php-7.0.21                /usr/bin/php-7.0.21
-COPY php/php-7.0.21                /usr/bin/php-7.0
-COPY php/php-7.1.7                 /usr/bin/php-7.1.7
-COPY php/php-7.1.7                 /usr/bin/php-7.1
-COPY php/php-without-xdebug-7.0.21 /usr/bin/php-without-xdebug-7.0.21
-COPY php/php-without-xdebug-7.0.21 /usr/bin/php-without-xdebug-7.0
-COPY php/php-without-xdebug-7.1.7  /usr/bin/php-without-xdebug-7.1.7
-COPY php/php-without-xdebug-7.1.7  /usr/bin/php-without-xdebug-7.1
-
-# The 'php' and 'php-without-xdebug' commands should call the most recent PHP versions
-USER root
-RUN rm /usr/bin/php \
- && cp /usr/bin/php-7.1.7 /usr/bin/php \
- && cp /usr/bin/php-without-xdebug-7.1.7 /usr/bin/php-without-xdebug \
- && chmod +x /usr/bin/php*
-USER jenkins
+COPY php/php* /usr/bin/
 
 ENTRYPOINT ["jenkins-slave"]

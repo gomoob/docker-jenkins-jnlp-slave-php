@@ -33,9 +33,11 @@ The following tools can be called under the Jenkins slave.
 
 Each version of PHP available is compiled with the following extensions.
 
-`bcmath`, `bz2`, `calendar`, `cli`, `ctype`, `dom`, `fileinfo`, `filter`, `ipc`, `json`, `mbregex`, `mbstring`, `mhash`,
-`mcrypt`, `pcntl`, `pcre`, `pdo`, `phar`, `posix`, `readline`, `sockets`, `tokenizer`, `xml`, `curl`, `openssl`, `zip`,
-`sqlite`, `mysql`, `pgsql`, `gd`, `iconv`, `intl`, `exif`, `soap`
+`dba`, `ipv6`, `dom`, `calendar`, `wddx`, `static`, `inifile`, `inline`, `cli`, `ftp`, `filter`, `gcov`, `zts`, `json`,
+`hash`, `exif`, `mbstring`, `mbregex`, `libgcc`, `pdo`, `posix`, `embed`, `sockets`, `phpdbg`, `zip`, `bcmath`,
+`fileinfo`, `ctype`, `cgi`, `soap`, `pcntl`, `phar`, `session`, `tokenizer`, `opcache`, `imap`, `tidy`, `kerberos`,
+`xmlrpc`, `fpm`, `dtrace`, `pcre`, `mhash`, `mcrypt`, `zlib`, `curl`, `readline`, `editline`, `gd`, `intl`, `icu`,
+`openssl`, `mysql`, `sqlite`, `pgsql`, `xml`, `xml_all`, `gettext`, `iconv`, `bz2`, `ipc`, `gmp`.
 
 ## Additional extensions
 

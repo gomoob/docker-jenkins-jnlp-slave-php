@@ -1,0 +1,2 @@
+#!/bin/bash
+/home/jenkins/.phpbrew/php/php-7.1.7/bin/php "$@"
