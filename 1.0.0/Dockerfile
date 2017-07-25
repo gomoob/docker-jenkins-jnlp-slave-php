@@ -61,7 +61,16 @@ USER jenkins
 RUN printf "\n\n==== Install prestissimo ====\n" \
  && composer global require hirak/prestissimo \
 
+ # see https://wiki.gentoo.org/wiki/GCC_optimization/fr
+ # see https://wiki.gentoo.org/wiki/Safe_CFLAGS
+ # see https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+ # see https://github.com/mgorny/cpuid2cpuflags
+ # CPU_FLAGS_X86: aes avx avx2 f16c fma3 mmx mmxext popcnt sse sse2 sse3 sse4_1 sse4_2 ssse3
+ #                -maes -mavx -mavx2 -mf16c -mfma -mmmx -mpopcnt -msse -msse2 -msse3 -msse4.1 -msse4.2 -mssse3
+ # WARNING: Will generate code which will only work under Amazon t2 instances !
  && printf "\n\n==== Install several PHP versions with phpbrew ====\n" \
+ && export CFLAGS="-march=sandybridge -O3" \
+ && export CXXFLAGS="${CFLAGS}" \
  && phpbrew init \
  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
  && phpbrew install -j $(nproc) 7.0.21 +everything -debug -gmp -zts -- \
