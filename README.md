@@ -37,7 +37,7 @@ Each version of PHP available is compiled with the following extensions.
 `hash`, `exif`, `mbstring`, `mbregex`, `libgcc`, `pdo`, `posix`, `embed`, `sockets`, `phpdbg`, `zip`, `bcmath`,
 `fileinfo`, `ctype`, `cgi`, `soap`, `pcntl`, `phar`, `session`, `tokenizer`, `opcache`, `imap`, `tidy`, `kerberos`,
 `xmlrpc`, `fpm`, `dtrace`, `pcre`, `mhash`, `mcrypt`, `zlib`, `curl`, `readline`, `editline`, `gd`, `intl`, `icu`,
-`openssl`, `mysql`, `sqlite`, `pgsql`, `xml`, `xml_all`, `gettext`, `iconv`, `bz2`, `ipc`, `gmp`.
+`openssl`, `mysql`, `sqlite`, `pgsql`, `xml`, `xml_all`, `gettext`, `iconv`, `bz2`, `ipc`.
 
 ## Additional extensions
 

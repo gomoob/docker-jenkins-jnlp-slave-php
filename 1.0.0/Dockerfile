@@ -64,9 +64,9 @@ RUN printf "\n\n==== Install prestissimo ====\n" \
  && printf "\n\n==== Install several PHP versions with phpbrew ====\n" \
  && phpbrew init \
  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
- && phpbrew install -j $(nproc) 7.0.21 +everything -debug -zts -- \
+ && phpbrew install -j $(nproc) 7.0.21 +everything -debug -gmp -zts -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
- && phpbrew install -j $(nproc) 7.1.7 +everything -debug -zts -- \
+ && phpbrew install -j $(nproc) 7.1.7 +everything -debug -gmp -zts -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
 
  && printf "\n\n==== Install PHP extensions for PHP 7.0.21 ====\n" \
