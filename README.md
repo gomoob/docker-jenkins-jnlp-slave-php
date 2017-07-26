@@ -33,10 +33,10 @@ The following tools can be called under the Jenkins slave.
 
 Each version of PHP available is compiled with the following extensions.
 
-`dba`, `ipv6`, `dom`, `calendar`, `wddx`, `static`, `inifile`, `inline`, `cli`, `ftp`, `filter`, `gcov`, `zts`, `json`,
-`hash`, `exif`, `mbstring`, `mbregex`, `libgcc`, `pdo`, `posix`, `embed`, `sockets`, `phpdbg`, `zip`, `bcmath`,
+`dba`, `ipv6`, `dom`, `calendar`, `wddx`, `static`, `inifile`, `inline`, `cli`, `ftp`, `filter`, `zts`, `json`,
+`hash`, `exif`, `mbstring`, `mbregex`, `libgcc`, `pdo`, `posix`, `embed`, `sockets`, `zip`, `bcmath`,
 `fileinfo`, `ctype`, `cgi`, `soap`, `pcntl`, `phar`, `session`, `tokenizer`, `opcache`, `imap`, `tidy`, `kerberos`,
-`xmlrpc`, `fpm`, `dtrace`, `pcre`, `mhash`, `mcrypt`, `zlib`, `curl`, `readline`, `editline`, `gd`, `intl`, `icu`,
+`xmlrpc`, `fpm`, `pcre`, `mhash`, `mcrypt`, `zlib`, `curl`, `readline`, `editline`, `gd`, `intl`, `icu`,
 `openssl`, `mysql`, `sqlite`, `pgsql`, `xml`, `xml_all`, `gettext`, `iconv`, `bz2`, `ipc`.
 
 ## Additional extensions
@@ -54,7 +54,7 @@ In addition the following extensions are also installed with each PHP executable
 ## Run with command line
 
 ```console
-$ docker run --name jenkins-jnlp-slave-php gomoob/jenkins-slave-php -url http://jenkins-server:port <secret> <agent name>
+$ docker run --name jenkins-jnlp-slave-php gomoob/jenkins-jnlp-slave-php-url http://jenkins-server:port <secret> <agent name>
 ```
 
 ## Optional environment variables

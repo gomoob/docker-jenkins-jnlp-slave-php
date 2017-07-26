@@ -73,9 +73,9 @@ RUN printf "\n\n==== Install prestissimo ====\n" \
  && export CXXFLAGS="${CFLAGS}" \
  && phpbrew init \
  && echo 'source /home/jenkins/.phpbrew/bashrc' >> /home/jenkins/.bashrc \
- && phpbrew install -j $(nproc) 7.0.21 +everything -debug -gmp -zts -- \
+ && phpbrew install -j $(nproc) 7.0.21 +everything -debug -dtrace -gcov -gmp -phpdbg -zts -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
- && phpbrew install -j $(nproc) 7.1.7 +everything -debug -gmp -zts -- \
+ && phpbrew install -j $(nproc) 7.1.7 +everything -debug -dtrace -gcov -gmp -phpdbg -zts -- \
  --with-libdir=lib/x86_64-linux-gnu --with-gd=shared --enable-gd-natf --with-jpeg-dir=/usr --with-png-dir=/usr \
 
  && printf "\n\n==== Install PHP extensions for PHP 7.0.21 ====\n" \
